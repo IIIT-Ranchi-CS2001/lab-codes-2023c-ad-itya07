@@ -1,0 +1,52 @@
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+
+election_data = {
+    "State": [
+        "Madhya Pradesh", "Madhya Pradesh", "Madhya Pradesh", "Madhya Pradesh",
+        "Rajasthan", "Rajasthan", "Rajasthan", "Rajasthan"
+    ],
+    "Party": ["BJP", "INC", "BSP", "Others", "BJP", "INC", "BSP", "Others"],
+    "Seats_Won": [163, 66, 0, 1, 115, 69, 2, 13],
+    "Total_Seats": [230, 230, 230, 230, 200, 200, 200, 200],
+    "Voter_Turnout (%)": [72.1, 72.1, 72.1, 72.1, 74.2, 74.2, 74.2, 74.2]
+}
+
+file_name = "election_data.csv"
+
+if not os.path.exists(file_name):
+    try:
+        df = pd.DataFrame(election_data)
+        df.to_csv(file_name, index=False)
+        print(f"File '{file_name}' created successfully.")
+    except Exception as e:
+        print(f"Error writing to file: {e}")
+else:
+    print(f"File '{file_name}' already exists.")
+
+
+try:
+    df = pd.read_csv(file_name)
+    df["Seats_Percentage"] = (df["Seats_Won"] / df["Total_Seats"]) * 100
+
+    top_parties = df.loc[df.groupby("State")["Seats_Won"].idxmax(), ["State", "Party", "Seats_Won"]]
+
+    print("\nParty with the highest number of seats in each state:")
+    print(top_parties)
+
+    plt.figure(figsize=(10, 6))
+    for state in df["State"].unique():
+        state_data = df[df["State"] == state]
+        plt.bar(state_data["Party"], state_data["Seats_Won"], label=state)
+
+    plt.title("Seats Won by Each Party in Each State")
+    plt.xlabel("Party")
+    plt.ylabel("Seats Won")
+    plt.legend(title="State")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+except Exception as e:
+    print(f"Error during file operations or calculations: {e}")
